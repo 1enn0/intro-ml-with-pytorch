@@ -1,0 +1,6 @@
+{
+    "sample_rate":16000,
+    "n_fft": 2048,
+    "hop_length": 512,
+    "n_mels": 128
+}
