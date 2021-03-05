@@ -3,15 +3,10 @@
 This repository contains some tutorials on machine learning using JupyterLab
 notebook and PyTorch.
 
-There is a basic introduction to JupyterLab notebooks and PyTorch as well as
-a full end-to-end example on how to train an audio classification network
-using transfer learning in Python and running inference using the trained
-model in a standalone C++ application.
-
 ## Contents of this Repository
 
 * `inference-cpp`: code for the c++ inference application
-* `notebooks`: Jupyter notebooks containing the actual tutorials (including code)
+* `notebooks`: Jupyter notebooks containing the tutorials (including code)
     - `0_intro_machine_learning.ipynb`: Basic introduction to machine learning
     - `1_pytorch_basic.ipynb`: Train a simple neural network to learn a line equation
     - `2_pytorch_advanced.ipynb`: Train an audio classifier model using transfer learning
