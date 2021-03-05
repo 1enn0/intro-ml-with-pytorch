@@ -10,25 +10,20 @@ model in a standalone C++ application.
 
 ## Contents of this Repository
 
-* `environments`: Python environment files for `conda` and `pip`
 * `inference-cpp`: code for the c++ inference application
 * `notebooks`: Jupyter notebooks containing the actual tutorials (including code)
-    - `0_notebooks.ipynb`: Introduction to Jupyter notebooks
-    - `1_matplotlib.ipynb`: Introduction to Matplotlib (a Python plotting library)
-    - `2_ipywidgets.ipynb`: Introduction to ipywidgets (interactive widgets for Jupyter notebooks)
-    - `3_pytorch_basic.ipynb`: Training a simple network to learn a sine curve
-    - `4_pytorch_advanced.ipynb`: Using transfer learning to train an audio classifier model
+    - `0_intro_machine_learning.ipynb`: Basic introduction to machine learning
+    - `1_pytorch_basic.ipynb`: Train a simple neural network to learn a line equation
+    - `2_pytorch_advanced.ipynb`: Train an audio classifier model using transfer learning
 * `train`: default training directory (used to saved trained model and spectrogram config)
 * `test/data`: directory containing some audio files used for testing
-
-
 
 ## Setup
 
 First, you neeed to clone this repository. Make sure to include the submodule(s) when cloning by running
 
 ```
-git clone --recurse-submodules https://stash.steinberg-intra.net/scm/~lhannink/jupyter-pytorch-tutorial.git
+git clone --recurse-submodules https://stash.steinberg-intra.net/scm/~lhannink/intro-ml-with-pytorch.git
 ```
 
 In case you did a bare `clone` without the submodule flag, run
