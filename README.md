@@ -9,7 +9,7 @@ notebook and PyTorch.
 * `notebooks`: Jupyter notebooks containing the tutorials (including code)
     - `0_intro_machine_learning.ipynb`: Basic introduction to machine learning
     - `1_pytorch_basic.ipynb`: Train a simple neural network to learn a line equation
-    - `2_pytorch_advanced.ipynb`: Train an audio classifier model using transfer learning
+    - `2_pytorch_advanced.ipynb`: Train an audio classification model using transfer learning
 * `train`: default training directory (used to saved trained model and spectrogram config)
 * `test/data`: directory containing some audio files used for testing
 
