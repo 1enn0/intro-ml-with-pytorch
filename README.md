@@ -44,7 +44,7 @@ If you don't have Python 3.8 and `pipenv` installed have a look at [INSTALLING_P
 ### Create Virtual Environment
 
 The tutorial notebooks are intended to be run from within a Python virtual
-environment. 
+environment.
 
 Open up a terminal **in the directory of this repository** and run
 
@@ -53,7 +53,15 @@ pipenv install
 ```
 
 to automatically create a new virtual environment using the correct
-Python version and install all package dependencies.
+Python version and install the package dependencies.
+
+Unfortunately, installing PyTorch through `pipenv` is not possible at the
+moment due to a bug, so we will have to use raw `pip` to install it:
+
+```
+pipenv run pip install torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.1 -f https://download.pytorch.org/whl/torch_stable.html
+pipenv run pip install fastai==2.1.9 fastaudio==0.1.4
+```
 
 ### Start JupyterLab
 

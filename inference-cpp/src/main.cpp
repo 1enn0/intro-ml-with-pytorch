@@ -22,7 +22,7 @@ void print_usage ()
 		<< "Arguments:\n"
 		<< "\t module-path : path to TorchScript module to run\n"
 		<< "\t inputs-path : path to TorchScript module containing one or more named buffers\n"
-		<< "\t				 identical shape. These buffers will be stacked into a single tensor\n"
+		<< "\t               of identical shape. These buffers will be stacked into a single tensor\n"
 		<< "\t               that will be passed to the model's forward() method.\n"
 		<< "\toutputs-path : (optional) where to save the model output. E.g., this can be \n"
 		<< "\t               loaded again in Python by running\n"
