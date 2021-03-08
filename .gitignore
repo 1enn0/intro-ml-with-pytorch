@@ -6,3 +6,4 @@ build
 # temporary/generated files
 vocab-gen.h
 *.pt
+*.pkl
