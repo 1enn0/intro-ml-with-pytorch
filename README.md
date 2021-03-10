@@ -60,7 +60,7 @@ moment due to a bug, so we will have to use raw `pip` to install it:
 
 #### CPU Version
 
-Install this if you don't know if you have a CUDA-capable GPU:
+Install this if you don't know if you have a CUDA-capable GPU. The training will be slower using the CPU version but there is no additional setup required.
 
 ```
 pipenv run pip install torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.1 -f https://download.pytorch.org/whl/torch_stable.html
