@@ -58,10 +58,24 @@ Python version and install the package dependencies.
 Unfortunately, installing PyTorch through `pipenv` is not possible at the
 moment due to a bug, so we will have to use raw `pip` to install it:
 
+#### CPU Version
+
+Install this if you don't know if you have a CUDA-capable GPU:
+
 ```
 pipenv run pip install torch==1.7.1+cpu torchvision==0.8.2+cpu torchaudio==0.7.1 -f https://download.pytorch.org/whl/torch_stable.html
 pipenv run pip install fastai==2.1.9 fastaudio==0.1.4
 ```
+
+#### CUDA Version
+
+If you have a CUDA-capable GPU and have a working CUDA 11.0 installation (including corresponding cuDNN version), you can install the CUDA-enabled version:
+
+```
+pipenv run pip install torch==1.7.1+cu110 torchvision==0.8.2+cu110 torchaudio==0.7.1 -f https://download.pytorch.org/whl/torch_stable.html
+pipenv run pip install fastai==2.1.9 fastaudio==0.1.4
+```
+
 
 ### Start JupyterLab
 
