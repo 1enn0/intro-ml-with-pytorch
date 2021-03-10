@@ -1,12 +1,18 @@
 from fastcore.transform import Transform
 from fastaudio.core.signal import AudioTensor
 import numpy as np
+import torch
 import matplotlib.pyplot as plt
 
 class AudioNormalize(Transform):
-    "Normalizes a single `AudioTensor`."
+    """Normalize a single `AudioTensor`."""
     def encodes(self, x:AudioTensor): return (x - x.mean()) / x.std()
 
+def make_xresnet_grayscale(model):
+    """Modifies xresnet `model` to accept single-channel images as input."""
+    model[0][0].in_channels = 1
+    # average original weights to reduce dimension
+    model[0][0].weight = torch.nn.Parameter(model[0][0].weight.mean(1, keepdim=True))
 
 def print_top_results(test_sample_idx, preds, labels, vocab, show_max=5):
     """Print top results for a single test sample"""
