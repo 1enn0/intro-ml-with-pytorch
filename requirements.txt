@@ -1,3 +1,6 @@
+https://download.pytorch.org/whl/cpu/torch-1.7.1%2Bcpu-cp37-cp37m-linux_x86_64.whl
+https://download.pytorch.org/whl/torchaudio-0.7.1-cp37-cp37m-linux_x86_64.whl
+https://download.pytorch.org/whl/cpu/torchvision-0.8.2%2Bcpu-cp37-cp37m-linux_x86_64.whl
 anyio==2.2.0
 appdirs==1.4.4
 argon2-cffi==20.1.0
@@ -20,6 +23,8 @@ cymem==2.0.5
 decorator==4.4.2
 defusedxml==0.7.1
 entrypoints==0.3
+fastai==2.1.9
+fastaudio==0.1.4
 idna==2.10
 ipykernel==5.5.0
 ipympl==0.6.3
