@@ -1,8 +1,12 @@
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning)
+
 from fastcore.transform import Transform
 from fastaudio.core.signal import AudioTensor
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 class AudioNormalize(Transform):
     """Normalize a single `AudioTensor`."""
@@ -40,4 +44,82 @@ def plot_top_results (preds_softmax, vocab, title=None, show_max=5, figsize=None
     ax.set_yticks(x)
     ax.set_yticklabels(vocab[idx_sort[:show_max]][::-1])
     
+    return fig, ax
+
+def plot_loss_landscape_3d(a, b, model, loss_fn, xx, yy, plot_initial_params=True, param_trajectory=None, seed=42):
+    torch.manual_seed(seed)
+    model[0].reset_parameters()
+    
+    n_mesh = 50
+    xv, yv = torch.meshgrid(torch.linspace(a - 2, a + 2, n_mesh), torch.linspace(b - 2, b + 2, n_mesh))
+    zv = torch.zeros_like(xv)
+    
+    with torch.no_grad():
+        initial_params = torch.tensor([*[p for p in model.parameters()], loss_fn(model(xx), yy)])
+        for i, (x, y) in enumerate(zip(xv.flatten(), yv.flatten())):
+            pa, pb = model.parameters()
+            pa.copy_(x.reshape(pa.shape))
+            pb.copy_(y.reshape(pb.shape))
+            loss = loss_fn(model(xx), yy)
+            zv.flatten()[i] = loss
+        
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    min_loss = zv.min().item()
+    max_loss = zv.max().item()
+    ax.plot_surface(
+        xv.numpy(), yv.numpy(), zv.numpy(),
+        cmap=mpl.cm.inferno,
+        norm=mpl.colors.LogNorm(vmin=min_loss, vmax=max_loss * 2),
+        antialiased=False, zorder=0)
+    if plot_initial_params:
+        ax.text3D(*initial_params, 'x', zorder=100)
+    if param_trajectory is not None:
+        ax.plot(*param_trajectory.T, zorder=20, color='white')
+
+    ax.set_xlabel('a')
+    ax.set_ylabel('b')
+    ax.set_zlabel('loss')
+    ax.view_init(elev=30, azim=-110)
+    fig.tight_layout()
+    return fig, ax
+
+def plot_loss_landscape_2d(a, b, model, loss_fn, xx, yy, plot_initial_params=True, param_trajectory=None, seed=42):
+    torch.manual_seed(seed)
+    model[0].reset_parameters()
+    
+    n_mesh = 50
+    xv, yv = torch.meshgrid(torch.linspace(a - 2, a + 2, n_mesh), torch.linspace(b - 2, b + 2, n_mesh))
+    zv = torch.zeros_like(xv)
+    
+    with torch.no_grad():
+        initial_params = torch.tensor([*[p for p in model.parameters()], loss_fn(model(xx), yy)])
+        for i, (x, y) in enumerate(zip(xv.flatten(), yv.flatten())):
+            pa, pb = model.parameters()
+            pa.copy_(x.reshape(pa.shape))
+            pb.copy_(y.reshape(pb.shape))
+            loss = loss_fn(model(xx), yy)
+            zv.flatten()[i] = loss
+        
+    min_loss = zv.min().item()
+    max_loss = zv.max().item()
+    fig, ax = plt.subplots()
+    cs = ax.contourf(
+        xv.numpy(), yv.numpy(), zv.numpy(), 
+        levels=np.logspace(np.log10(min_loss), np.log10(max_loss), n_mesh),
+        norm=mpl.colors.LogNorm(vmin=min_loss, vmax=max_loss * 2),
+        cmap=mpl.cm.inferno)
+    if plot_initial_params and param_trajectory is None:
+        ax.text(*initial_params[:2], 'x')
+    if param_trajectory is not None:
+        ax.plot(*param_trajectory.T[:2], color='white', label='model params')
+        ax.scatter(a, b, color='red', label='target')
+        ax.text(*(param_trajectory[0, :2] + 0.01), 'initial', color='white')
+        ax.text(*(param_trajectory[-1, :2] - 0.01), 'final', color='white', ha='right')
+        ax.legend();
+
+    ax.set_xlabel('a')
+    ax.set_ylabel('b')
+    fig.tight_layout()
     return fig, ax
