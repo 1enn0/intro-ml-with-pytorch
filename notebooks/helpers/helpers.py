@@ -1,4 +1,3 @@
-
 from .dirs import *
 
 def write_vocab_cpp_header (vocab):
