@@ -95,7 +95,7 @@ int main (int argc, const char* argv[])
 
 	std::cout << "\nInspecting '" << argv[2] << "' for named buffers.\n";
 	auto n_samples = static_cast<int> (input_container.named_buffers().size ());
-	auto inputs = torch::zeros ({n_samples, 1, 128, 157});
+	auto inputs = torch::zeros ({n_samples, 3, 128, 157});
 	std::vector<std::string> labels;
 
 	int idx = 0;
@@ -119,12 +119,13 @@ int main (int argc, const char* argv[])
 	const auto duration = std::chrono::duration<double, std::milli> (std::chrono::high_resolution_clock::now () - start);
 	std::cout << "took " << duration.count () << " ms.\n";
 
-	// print model predictions vs labels
+	// print sample labels vs model predictions
 	auto max_idcs = outputs.argmax (1);
-	std::cout << "\nOutput: [sample #] (prediction, label)\n";
+	auto ps = outputs.softmax(1);
+	std::cout << "\nOutput: [label]: prediction (p)\n";
 	for (int i {0}; i < n_samples; ++i)
-		std::cout << "  [#" << i + 1 << "] ('" << vocab[max_idcs[i].item<int> ()] << "', '" << labels[i]
-		          << "')\n";
+		std::cout << "  - [" << labels[i] << "]: " << vocab[max_idcs[i].item<int> ()] << " (" << std::setprecision(2) << ps[i].max().item<float> () << ")"
+		          << "\n";
 
 	// save output tensor for further processing back in python
 	if (argc >= 4)
