@@ -7,11 +7,14 @@
 
 #include <chrono>
 #include <iostream>
+#include <sstream>
 
+#include <torch/torch.h>
 #include <torch/script.h>
-#include <torch/serialize.h>
 
 #include "vocab-gen.h"
+
+using Clock = std::chrono::high_resolution_clock;
 
 //------------------------------------------------------------------------
 void print_usage ()
@@ -50,16 +53,12 @@ bool load_module (const std::string& filename, torch::jit::script::Module& modul
 
 //------------------------------------------------------------------------
 std::string get_shape (const at::Tensor& t)
-{
-	std::string shape{ "[" };
+{	std::stringstream shape;
+	shape << "[";
 	for (int d{ 0 }; d < t.ndimension () - 1; ++d)
-	{
-		shape.append (std::to_string (t.size (d)));
-		shape.append (", ");
-	}
-	shape.append (std::to_string (t.size (t.ndimension () - 1)));
-	shape.append ("]");
-	return shape;
+		shape << t.size(d) << ", ";
+	shape << t.size (t.ndimension () - 1) << "]";
+	return shape.str();
 }
 
 //------------------------------------------------------------------------
@@ -81,7 +80,7 @@ int main (int argc, const char* argv[])
 		return -1;
 	}
 
-	// deserialize the script module from file
+	// deserialize the model script module from file
 	torch::jit::script::Module model;
 	if (!load_module(argv[1], model))
 		return with_error_msg("failed");
@@ -89,42 +88,61 @@ int main (int argc, const char* argv[])
 	if (argc < 3)
 		return 0;
 
+	// deserialize the input container script module from file
 	torch::jit::script::Module input_container;
 	if (!load_module(argv[2], input_container))
 		return with_error_msg("loading of module failed");
 
+	// aggregate all named buffers from <input_container> into a single tensor
 	std::cout << "\nInspecting '" << argv[2] << "' for named buffers.\n";
 	auto n_samples = static_cast<int> (input_container.named_buffers().size ());
-	auto inputs = torch::zeros ({n_samples, 1, 128, 157});
+	auto inputs = torch::zeros ({n_samples, 3, 128, 157});
 	std::vector<std::string> labels;
 
 	int idx = 0;
-	for (const auto& attr : input_container.named_buffers())
+	for (const auto& named_buffer : input_container.named_buffers())
 	{
-		auto& tensor = attr.value;
-		labels.push_back (attr.name);
+		labels.push_back (named_buffer.name);
 
-		std::cout << "  - found buffer '" << attr.name << "' with shape " << get_shape(tensor) << "\n";
+		std::cout << "  - found buffer '" << named_buffer.name << "' with shape " << get_shape(named_buffer.value) << "\n";
 
-		// copy buffer data into stacked input tensor
-		inputs.slice (0, idx, idx + 1) = tensor;
-		idx++;
+		// copy buffer into stacked <inputs> tensor
+		inputs[idx++] = named_buffer.value;
 	}
 
-	// run single inference step
 	std::cout << "\nRunning inference using stacked input tensor with shape " << get_shape(inputs) << "...";
+	const auto start = Clock::now();
 
-	const auto start = std::chrono::high_resolution_clock::now ();
+	// run inference step by calling forward()
 	const auto outputs = model.forward ({inputs}).toTensor ();
-	const auto duration = std::chrono::duration<double, std::milli> (std::chrono::high_resolution_clock::now () - start);
+
+	const auto duration = std::chrono::duration<double, std::milli> (Clock::now () - start);
 	std::cout << "took " << duration.count () << " ms.\n";
 
-	// print model predictions vs labels
-	auto max_idcs = outputs.argmax (1);
-	std::cout << "\nOutput: [sample #] (prediction, label)\n";
+	// the output is a matrix of shape [n_samples, 50]
+	// each row contains an unnormalized score for every of our categories
+	// to convert this into probabilities (s.t. row.sum() == 1.0), we compute
+	// the softmax across the 1st dimension
+	auto out_softmax = outputs.softmax(/* dim = */ 1);
+
+	// for each sample (== row), we compute the max value and its index 
+	torch::Tensor values;
+	torch::Tensor indices;
+	std::tie (values, indices) = out_softmax.max (/* dim = */ 1);
+
+	const auto* probs = values.data_ptr<float> ();
+	const auto* idcs = indices.data_ptr<int64_t> ();
+
+	// print sample labels vs model predictions
+	std::cout << "\nModel Predictions:\n";
 	for (int i {0}; i < n_samples; ++i)
-		std::cout << "  [#" << i + 1 << "] ('" << vocab[max_idcs[i].item<int> ()] << "', '" << labels[i]
-		          << "')\n";
+	{
+		std::cout << "  - '" << labels[i] << "' classified as '" 
+				  << vocab[idcs[i]]
+			      << "' (p=" << std::setprecision(2) << probs[i] << ")"
+		          << "\n";
+
+	}
 
 	// save output tensor for further processing back in python
 	if (argc >= 4)
