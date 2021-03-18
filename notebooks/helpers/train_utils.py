@@ -3,6 +3,7 @@ warnings.filterwarnings('ignore', category=UserWarning)
 
 from fastcore.transform import Transform
 from fastaudio.core.signal import AudioTensor
+from fastaudio.core.spectrogram import AudioSpectrogram
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
@@ -12,11 +13,21 @@ class AudioNormalize(Transform):
     """Normalize a single `AudioTensor`."""
     def encodes(self, x:AudioTensor): return (x - x.mean()) / x.std()
 
-def make_xresnet_grayscale(model):
-    """Modifies xresnet `model` to accept single-channel images as input."""
-    model[0][0].in_channels = 1
-    # average original weights to reduce dimension
-    model[0][0].weight = torch.nn.Parameter(model[0][0].weight.mean(1, keepdim=True))
+    
+class SpectrogramToFakeRGB(Transform):
+    """Transform single-channel spectrograms into fake RGB images
+    
+    Args:
+        as_batch_tfm: True if used as batch transform
+    """
+    def __init__(self, as_batch_tfm=True):
+        n_dims = 4 if as_batch_tfm else 3
+        channel_dim_idx = 1 if as_batch_tfm else 0
+        self.sizes = [3 if dim == channel_dim_idx else 1 for dim in range(n_dims)]
+
+    def encodes(self, x: AudioSpectrogram):
+        return x.repeat(*self.sizes)
+    
 
 def print_top_results(test_sample_idx, preds, labels, vocab, show_max=5):
     """Print top results for a single test sample"""
