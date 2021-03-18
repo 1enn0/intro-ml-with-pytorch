@@ -3,6 +3,7 @@ warnings.filterwarnings('ignore', category=UserWarning)
 
 from fastcore.transform import Transform
 from fastaudio.core.signal import AudioTensor
+from fastaudio.core.spectrogram import AudioSpectrogram
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
