@@ -138,8 +138,8 @@ int main (int argc, const char* argv[])
 	for (int i {0}; i < n_samples; ++i)
 	{
 		std::cout << "  - '" << labels[i] << "' classified as '" 
-				  << vocab[idcs[i]]
-			      << "' (p=" << std::setprecision(2) << probs[i] << ")"
+		          << vocab[idcs[i]]
+		          << "' (p=" << std::setprecision(2) << probs[i] << ")"
 		          << "\n";
 
 	}
